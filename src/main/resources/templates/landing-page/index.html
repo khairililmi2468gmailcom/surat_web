@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Surat | Sistem Pembuatan Surat Modern</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 flex flex-col min-h-screen">
+
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <main class="flex-grow">
+        <div th:replace="landing-page/sections/hero-section :: hero"></div>
+
+        <div th:replace="landing-page/sections/features-section :: features"></div>
+
+        <div th:replace="landing-page/sections/cta-section :: cta"></div>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

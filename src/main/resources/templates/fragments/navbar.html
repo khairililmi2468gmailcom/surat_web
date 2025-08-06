@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body class="bg-slate-50">
+    <header th:fragment="navbar" class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-gray-800">
+                E-Surat
+            </a>
+            <div class="flex items-center space-x-4">
+                <a th:href="@{/auth/login}" class="text-gray-600 hover:text-gray-900 transition-colors duration-300">Login</a>
+                <a th:href="@{/auth/register}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors duration-300">Register</a>
+            </div>
+        </nav>
+    </header>
+</body>
+</html>

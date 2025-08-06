@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen">
+ <main class="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl">
+    <h1 class="text-4xl font-bold text-gray-800 mb-4">Halo, <span th:text="${username}"></span>!</h1>
+    <p class="text-lg text-gray-600">Selamat datang di dashboard.</p>
+
+    <div class="mt-8">
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" ... >Logout</button>
+        </form>
+    </div>
+</main>
+</main>
+</body>
+</html>
