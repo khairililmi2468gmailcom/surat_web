@@ -4,7 +4,10 @@ import com.example.basic.model.Message;
 import com.example.basic.model.User;
 import com.example.basic.repository.MessageRepository;
 import com.example.basic.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,7 +16,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Map;
 
 @Controller
 public class AppController {
@@ -31,51 +37,77 @@ public class AppController {
     public String showLandingPage(){
         return "landing-page/index";
     }
-    // route kontak
-    // Method GET hanya untuk menampilkan form
-    @GetMapping("contact")
+    
+    @GetMapping("/contact")
     public String showContactPage(Model model){
         model.addAttribute("message", new Message());
         return "pages/contact";
     }
    
-    // Method POST hanya untuk memproses data form
-    @PostMapping("contact")
+    @PostMapping("/contact")
     public String submitContactForm(@ModelAttribute("message") Message message, RedirectAttributes redirectAttributes){
         messageRepository.save(message);
         redirectAttributes.addFlashAttribute("successMessage", "Terima kasih, pesan Anda telah terkirim!");
         return "redirect:/contact";
     }
 
-
-
-
-    @GetMapping("auth/login")
+    @GetMapping("/auth/login")
     public String showLoginPage(Model model) {
-        // Langsung tampilkan halaman login, tidak lagi menggunakan layout
         return "auth/login";
     }
 
-    @GetMapping("auth/register")
+    @GetMapping("/auth/register")
     public String showRegisterPage(Model model) {
-        // Langsung tampilkan halaman register
         return "auth/register";
     }
 
-    @PostMapping("register")
-    public String registerUser(@ModelAttribute User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-        return "redirect:/auth/login";
+    /**
+     * Menangani registrasi pengguna baru via form (AJAX).
+     * Method ini mengembalikan ResponseEntity dalam format JSON.
+     */
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, Object>> registerUser(@RequestParam String username,
+                                                              @RequestParam String email,
+                                                              @RequestParam String password) {
+        // 1. Cek duplikasi email
+        if (userRepository.findByEmail(email).isPresent()) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT) // HTTP 409: Konflik
+                    .body(Map.of("success", false, "message", "Email sudah terdaftar. Silakan gunakan email lain."));
+        }
+        
+        // 2. Cek duplikasi username
+        if (userRepository.findByUsername(username).isPresent()) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT) // HTTP 409: Konflik
+                    .body(Map.of("success", false, "message", "Username sudah digunakan. Silakan pilih username lain."));
+        }
+        
+        // Buat dan simpan pengguna baru
+        User newUser = new User();
+        newUser.setUsername(username);
+        newUser.setEmail(email);
+        newUser.setPassword(passwordEncoder.encode(password)); // Gunakan bean PasswordEncoder
+        newUser.setProvider("LOCAL"); // Set provider secara eksplisit
+        
+        userRepository.save(newUser);
+
+        // Kirim respons sukses
+        return ResponseEntity
+                .ok(Map.of("success", true, "message", "Registrasi berhasil! Anda akan dialihkan ke halaman login."));
     }
 
-    @GetMapping("dashboard")
+    @GetMapping("/dashboard")
     public String showDashboardPage(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        String userEmail = authentication.getName(); 
         
-        model.addAttribute("username", username);
-        // Langsung tampilkan halaman dashboard
+        // Ambil detail user dari database untuk mendapatkan username
+        userRepository.findByEmail(userEmail).ifPresent(user -> {
+            model.addAttribute("userEmail", user.getEmail());
+            model.addAttribute("username", user.getUsername());
+        });
+        
         return "dashboard";
     }
 }
